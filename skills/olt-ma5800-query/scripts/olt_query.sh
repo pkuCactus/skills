@@ -12,7 +12,7 @@ set -eu
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONNECT_SCRIPT="${SCRIPT_DIR}/olt_connect.sh"
-DOC_DIR="${DOC_DIR:-/tmp/ma5800_md/cmd}"
+DOC_DIR="${DOC_DIR:-~/.openclaw/ma5800_md/cmd}"
 
 # 默认值配置
 DEFAULT_FRAME="0"
