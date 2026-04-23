@@ -1,6 +1,12 @@
 #!/bin/bash
 # MA5800 OLT 查询入口脚本
-# 用法: ./olt_query.sh <query_type> [args...]
+# 用法:
+#   ./olt_query.sh power [frameid|slotid]         - 查询功率（默认整框0）
+#   ./olt_query.sh power detail <frameid>         - 查询功耗详情
+# 示例:
+#   ./olt_query.sh power                          # 查整框功率 display power 0
+#   ./olt_query.sh power 0/1                       # 查0/1槽位功率
+#   ./olt_query.sh power detail 0                  # 查整框功耗详情
 # 
 # 支持的查询类型:
 #   board [frameid] [slotid]          - 查询单板信息
@@ -23,7 +29,8 @@
 #   log [operation|security]          - 查询日志
 #   health                             - 查询设备健康状态
 #   fan|emu|cooling                    - 查询风扇/EMU状态
-#   power|psu|battery [slot]           - 查询电源/功率信息
+#   power|psu|battery [slot]           - 查询功率（默认0号机框）
+  power detail <frameid>               - 查询功耗详情
 #
 # 环境变量:
 #   OLT_IP, OLT_USER, OLT_PASS, OLT_TIMEOUT, OLT_WIDTH
@@ -184,11 +191,11 @@ case "${QUERY_TYPE}" in
         ;;
     
     power|psu|battery)
-        # display power / display power detail
+        # display power <frameid|slot> - 必须带参数
         if [[ $# -ge 1 ]]; then
-            CMD="display power detail ${1}"
+            CMD="display power ${1}"
         else
-            CMD="display power"
+            CMD="display power 0"     # 默认查整框（0号机框）
         fi
         ;;
     

@@ -98,8 +98,9 @@ SSH 登录 → enable → config → mmi-mode enable → [执行 display 命令]
 ./scripts/olt_query.sh config
 ./scripts/olt_query.sh health
 ./scripts/olt_query.sh fan              # 查询风扇/EMU状态
-./scripts/olt_query.sh power            # 查询电源功率
-./scripts/olt_query.sh power 0/1       # 查询0/1槽位功耗详情
+./scripts/olt_query.sh power            # 查询整框功率（默认0号机框）
+./scripts/olt_query.sh power 0/1           # 查询0/1槽位功率
+./scripts/olt_query.sh power detail 0      # 查询整框功耗详情
 ./scripts/olt_query.sh port-state 0/1/1
 ./scripts/olt_query.sh ont-state 0/1/1
 ./scripts/olt_query.sh service-port
@@ -149,7 +150,7 @@ OLT_ENABLE=false OLT_CONFIG=false ./scripts/olt_connect.sh "display board 0"
 | 日志 | `display log` |
 | 健康、综合状态 | `display health` |
 | 风扇、EMU、散热、风机 | `display emu` |
-| 电源、功率、功耗、供电、电池 | `display power` / `display power detail` |
+| 电源、功率、功耗、供电、电池 | `display power 0` / `display power detail 0` |
 | DHCP | `display dhcp server lease` |
 
 ## OLT CLI 特性处理

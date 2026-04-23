@@ -109,11 +109,11 @@ determine_query() {
     if [[ "${input}" =~ (power|电源|功率|功耗|供电|psu|电池|battery) ]]; then
         local slot=$(extract_slot "${input}")
         if [[ -n "${slot}" ]]; then
-            echo "raw:display power detail ${slot}"
-        elif [[ "${input}" =~ (info|信息|系统|详情|detail) ]]; then
-            echo "raw:display power detail"
+            echo "raw:display power ${slot}"
+        elif [[ "${input}" =~ (detail|详情|详细|明细|information|info) ]]; then
+            echo "raw:display power detail 0"
         else
-            echo "raw:display power"
+            echo "raw:display power 0"
         fi
         return
     fi
