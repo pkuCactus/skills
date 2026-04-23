@@ -121,7 +121,11 @@ case "${QUERY_TYPE}" in
         ;;
     
     temperature|temp)
-        CMD="display temperature"
+        if [ $# -ge 1 ]; then
+            CMD="display temperature ${1}"
+        else
+            CMD="display temperature 0"
+        fi
         ;;
     
     config|current-config)

@@ -142,7 +142,7 @@ OLT_ENABLE=false OLT_CONFIG=false ./scripts/olt_connect.sh "display board 0"
 | ARP、三层地址 | `display arp` |
 | CPU、负载 | `display health` |
 | 内存、ram | `display memory` |
-| 温度、thermal | `display temperature` |
+| 温度、thermal | `display temperature 0` |
 | 配置、当前配置 | `display current-configuration` |
 | 业务端口、service-port | `display service-port` |
 | VLAN | `display vlan` |

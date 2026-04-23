@@ -272,7 +272,13 @@ determine_query() {
     
     # 温度
     if contains "(temperature|temp|温度|thermal|高温|发热)" "${input}"; then
-        echo "temperature"
+        local slot=""
+        slot="$(extract_slot "${input}")"
+        if [ -n "${slot}" ]; then
+            echo "raw:display temperature ${slot}"
+        else
+            echo "raw:display temperature 0"
+        fi
         return
     fi
     
