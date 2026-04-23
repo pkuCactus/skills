@@ -1,13 +1,8 @@
-#!/bin/bash
+#!/bin/sh
 # MA5800 OLT 查询入口脚本
-# 用法:
-#   ./olt_query.sh power [frameid|slotid]         - 查询功率（默认整框0）
-#   ./olt_query.sh power detail <frameid>         - 查询功耗详情
-# 示例:
-#   ./olt_query.sh power                          # 查整框功率 display power 0
-#   ./olt_query.sh power 0/1                       # 查0/1槽位功率
-#   ./olt_query.sh power detail 0                  # 查整框功耗详情
-# 
+# 兼容 BusyBox 1.34.1 ash
+# 用法: ./olt_query.sh <query_type> [args...]
+#
 # 支持的查询类型:
 #   board [frameid] [slotid]          - 查询单板信息
 #   version [frameid/slotid]          - 查询版本信息
@@ -30,23 +25,23 @@
 #   health                             - 查询设备健康状态
 #   fan|emu|cooling                    - 查询风扇/EMU状态
 #   power|psu|battery [slot]           - 查询功率（默认0号机框）
-  power detail <frameid>               - 查询功耗详情
+#   power detail <frameid>               - 查询功耗详情
 #
 # 环境变量:
 #   OLT_IP, OLT_USER, OLT_PASS, OLT_TIMEOUT, OLT_WIDTH
 
-set -euo pipefail
+set -eu
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONNECT_SCRIPT="${SCRIPT_DIR}/olt_connect.sh"
 
 # 检查连接脚本
-if [[ ! -x "${CONNECT_SCRIPT}" ]]; then
+if [ ! -x "${CONNECT_SCRIPT}" ]; then
     chmod +x "${CONNECT_SCRIPT}" 2>/dev/null || true
 fi
 
 # 检查 OLT 连接参数
-if [[ -z "${OLT_IP:-}" || -z "${OLT_USER:-}" || -z "${OLT_PASS:-}" ]]; then
+if [ -z "${OLT_IP:-}" ] || [ -z "${OLT_USER:-}" ] || [ -z "${OLT_PASS:-}" ]; then
     echo "错误: 请设置环境变量 OLT_IP, OLT_USER, OLT_PASS" >&2
     echo "默认值: OLT_IP=70.32.37.65 OLT_USER=root OLT_PASS=Admin@huawei123" >&2
     echo "示例: export OLT_IP=70.32.37.65 OLT_USER=root OLT_PASS=Admin@huawei123" >&2
@@ -55,14 +50,13 @@ fi
 
 # 查询类型
 QUERY_TYPE="${1:-}"
-shift || true
+shift 2>/dev/null || true
 
 case "${QUERY_TYPE}" in
     board)
-        # display board [frameid] [frameid/slotid]
-        if [[ $# -eq 0 ]]; then
+        if [ $# -eq 0 ]; then
             CMD="display board"
-        elif [[ $# -eq 1 ]]; then
+        elif [ $# -eq 1 ]; then
             CMD="display board ${1}"
         else
             CMD="display board ${1}/${2}"
@@ -70,8 +64,7 @@ case "${QUERY_TYPE}" in
         ;;
     
     version)
-        # display version [frameid/slotid]
-        if [[ $# -eq 0 ]]; then
+        if [ $# -eq 0 ]; then
             CMD="display version"
         else
             CMD="display version ${1}"
@@ -79,8 +72,7 @@ case "${QUERY_TYPE}" in
         ;;
     
     ont)
-        # display ont info <frameid> <slotid> <portid> [ontid|all]
-        if [[ $# -lt 3 ]]; then
+        if [ $# -lt 3 ]; then
             echo "用法: ont <frameid> <slotid> <portid> [ontid|all]" >&2
             exit 1
         fi
@@ -92,8 +84,7 @@ case "${QUERY_TYPE}" in
         ;;
     
     ont-optical|ontoptical|optical)
-        # display ont optical-info <portid> [ontid|all]
-        if [[ $# -lt 1 ]]; then
+        if [ $# -lt 1 ]; then
             echo "用法: ont-optical <portid> [ontid|all]" >&2
             exit 1
         fi
@@ -101,14 +92,12 @@ case "${QUERY_TYPE}" in
         ;;
     
     alarm|alarms)
-        # display alarm active / display alarm history
         local_alarm_type="${1:-active}"
         CMD="display alarm ${local_alarm_type}"
         ;;
     
     interface|if)
-        # display interface [ifname]
-        if [[ $# -eq 0 ]]; then
+        if [ $# -eq 0 ]; then
             CMD="display interface"
         else
             CMD="display interface ${1}"
@@ -140,8 +129,7 @@ case "${QUERY_TYPE}" in
         ;;
     
     port-state|portstate)
-        # display port state <portid>
-        if [[ $# -lt 1 ]]; then
+        if [ $# -lt 1 ]; then
             echo "用法: port-state <portid>" >&2
             exit 1
         fi
@@ -149,8 +137,7 @@ case "${QUERY_TYPE}" in
         ;;
     
     ont-state|ontstate)
-        # display ont state <portid> [ontid|all]
-        if [[ $# -lt 1 ]]; then
+        if [ $# -lt 1 ]; then
             echo "用法: ont-state <portid> [ontid|all]" >&2
             exit 1
         fi
@@ -158,18 +145,15 @@ case "${QUERY_TYPE}" in
         ;;
     
     service-port|sp)
-        # display service-port [id|all]
         CMD="display service-port ${1:-all}"
         ;;
     
     vlan)
-        # display vlan [vlanid|all]
         CMD="display vlan ${1:-all}"
         ;;
     
     traffic)
-        # display port traffic <portid>
-        if [[ $# -lt 1 ]]; then
+        if [ $# -lt 1 ]; then
             echo "用法: traffic <portid>" >&2
             exit 1
         fi
@@ -186,22 +170,27 @@ case "${QUERY_TYPE}" in
         ;;
     
     fan|emu|cooling)
-        # display emu
         CMD="display emu"
         ;;
     
     power|psu|battery)
-        # display power <frameid|slot> - 必须带参数
-        if [[ $# -ge 1 ]]; then
+        if [ $# -ge 1 ]; then
             CMD="display power ${1}"
         else
-            CMD="display power 0"     # 默认查整框（0号机框）
+            CMD="display power 0"
+        fi
+        ;;
+    
+    power-detail|powerdetail)
+        if [ $# -ge 1 ]; then
+            CMD="display power detail ${1}"
+        else
+            CMD="display power detail 0"
         fi
         ;;
     
     *)
-        # 未识别的查询类型，尝试作为原始命令传递
-        if [[ -n "${QUERY_TYPE}" ]]; then
+        if [ -n "${QUERY_TYPE}" ]; then
             CMD="${QUERY_TYPE} ${*}"
         else
             echo "错误: 未指定查询类型" >&2
