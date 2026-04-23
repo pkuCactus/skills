@@ -105,6 +105,19 @@ determine_query() {
         return
     fi
     
+    # 电源/功率/功耗
+    if [[ "${input}" =~ (power|电源|功率|功耗|供电|psu|电池|battery) ]]; then
+        local slot=$(extract_slot "${input}")
+        if [[ -n "${slot}" ]]; then
+            echo "raw:display power detail ${slot}"
+        elif [[ "${input}" =~ (info|信息|系统|详情|detail) ]]; then
+            echo "raw:display power detail"
+        else
+            echo "raw:display power"
+        fi
+        return
+    fi
+    
     # 版本/软件版本
     if [[ "${input}" =~ (version|版本|软件|firmware|patch|版本号) ]]; then
         local slot=$(extract_slot "${input}")
