@@ -1,0 +1,12 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Force shell scripts and markdown to always use LF line endings
+*.sh text eol=lf
+*.md text eol=lf
+
+# Binary files
+*.skill binary
+*.jpg binary
+*.png binary
+*.gif binary
