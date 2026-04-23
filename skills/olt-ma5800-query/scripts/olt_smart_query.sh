@@ -69,30 +69,37 @@ extract_first_num() {
 
 # 解析端口参数
 parse_port_args() {
-    local nums=($(extract_nums "$1"))
-    local port=$(extract_port "$1")
+    local input_text="$1"
+    local nums_str=""
+    nums_str="$(extract_nums "${input_text}")"
+    local nums_arr=(${nums_str})
+    local port=""
+    port="$(extract_port "${input_text}")"
     
     if [[ -n "${port}" ]]; then
         echo "${port}"
-    elif [[ ${#nums[@]} -ge 3 ]]; then
-        echo "${nums[0]}/${nums[1]}/${nums[2]}"
-    elif [[ ${#nums[@]} -ge 1 ]]; then
-        echo "${nums[0]}"
+    elif [[ ${#nums_arr[@]} -ge 3 ]]; then
+        echo "${nums_arr[0]}/${nums_arr[1]}/${nums_arr[2]}"
+    elif [[ ${#nums_arr[@]} -ge 1 ]]; then
+        echo "${nums_arr[0]}"
     fi
 }
 
 # 智能匹配查询类型
 determine_query() {
     local input="$1"
-    local nums=($(extract_nums "${input}"))
+    local nums_str=""
+    nums_str="$(extract_nums "${input}")"
+    local nums_arr=(${nums_str})
     
     # 单板/板卡相关
     if [[ "${input}" =~ (board|单板|板卡|slot|槽位|paf|subboard|子卡) ]]; then
-        local slot=$(extract_slot "${input}")
+        local slot=""
+        slot="$(extract_slot "${input}")"
         if [[ -n "${slot}" ]]; then
             echo "board:${slot}"
-        elif [[ ${#nums[@]} -ge 1 ]]; then
-            echo "board:${nums[0]}"
+        elif [[ ${#nums_arr[@]} -ge 1 ]]; then
+            echo "board:${nums_arr[0]}"
         else
             echo "board"
         fi
@@ -107,7 +114,8 @@ determine_query() {
     
     # 电源/功率/功耗
     if [[ "${input}" =~ (power|电源|功率|功耗|供电|psu|电池|battery) ]]; then
-        local slot=$(extract_slot "${input}")
+        local slot=""
+        slot="$(extract_slot "${input}")"
         if [[ -n "${slot}" ]]; then
             echo "raw:display power ${slot}"
         elif [[ "${input}" =~ (detail|详情|详细|明细|information|info) ]]; then
@@ -120,7 +128,8 @@ determine_query() {
     
     # 版本/软件版本
     if [[ "${input}" =~ (version|版本|软件|firmware|patch|版本号) ]]; then
-        local slot=$(extract_slot "${input}")
+        local slot=""
+        slot="$(extract_slot "${input}")"
         if [[ -n "${slot}" ]]; then
             echo "version:${slot}"
         else
@@ -131,8 +140,10 @@ determine_query() {
     
     # ONT 光功率/光模块
     if [[ "${input}" =~ (optical|光功率|光模块|光衰|rx|tx|收光|发光|光信号|光强) ]]; then
-        local port=$(parse_port_args "${input}")
-        local ont_id=$(extract_first_num "${input}")
+        local port=""
+        port="$(parse_port_args "${input}")"
+        local ont_id=""
+        ont_id="$(extract_first_num "${input}")"
         if [[ -n "${port}" ]]; then
             if [[ -n "${ont_id}" && ! "${port}" =~ "${ont_id}" ]]; then
                 echo "ont-optical:${port} ${ont_id}"
@@ -147,32 +158,38 @@ determine_query() {
     
     # ONT 信息/状态
     if [[ "${input}" =~ (ont|onu|终端|光猫|用户端|家庭网关|hg|hgw) ]]; then
-        local port=$(parse_port_args "${input}")
-        local ont_id=$(extract_first_num "${input}")
+        local port=""
+        port="$(parse_port_args "${input}")"
+        local ont_id=""
+        ont_id="$(extract_first_num "${input}")"
         
         # 如果有MAC地址，用MAC查询
-        local mac=$(extract_mac "${input}")
+        local mac=""
+        mac="$(extract_mac "${input}")"
         if [[ -n "${mac}" ]]; then
             echo "raw:display ont info by-mac ${mac}"
             return
         fi
         
         # 如果有IP地址
-        local ip=$(extract_ip "${input}")
+        local ip=""
+        ip="$(extract_ip "${input}")"
         if [[ -n "${ip}" ]]; then
             echo "raw:display ont info by-ip ${ip}"
             return
         fi
         
         # 如果有LOID
-        local loid=$(extract_loid "${input}")
+        local loid=""
+        loid="$(extract_loid "${input}")"
         if [[ -n "${loid}" ]]; then
             echo "raw:display ont info by-loid ${loid}"
             return
         fi
         
         # 如果有SN
-        local sn=$(extract_sn "${input}")
+        local sn=""
+        sn="$(extract_sn "${input}")"
         if [[ -n "${sn}" ]]; then
             echo "raw:display ont info by-sn ${sn}"
             return
@@ -204,14 +221,15 @@ determine_query() {
     # 接口/端口状态
     if [[ "${input}" =~ (interface|接口|port|端口|if|状态|up|down|链路) ]]; then
         if [[ "${input}" =~ (pon|光口|pon口|olt口|光纤口) ]]; then
-            local port=$(parse_port_args "${input}")
+            local port=""
+            port="$(parse_port_args "${input}")"
             if [[ -n "${port}" ]]; then
                 echo "raw:display interface ${port}"
             else
                 echo "interface"
             fi
-        elif [[ ${#nums[@]} -ge 1 ]]; then
-            echo "raw:display interface ${nums[0]}"
+        elif [[ ${#nums_arr[@]} -ge 1 ]]; then
+            echo "raw:display interface ${nums_arr[0]}"
         else
             echo "interface"
         fi
@@ -220,7 +238,8 @@ determine_query() {
     
     # MAC 地址表
     if [[ "${input}" =~ (mac-address|mac|mac地址|mac表|二层地址|桥接表|l2) ]]; then
-        local mac=$(extract_mac "${input}")
+        local mac=""
+        mac="$(extract_mac "${input}")"
         if [[ -n "${mac}" ]]; then
             echo "raw:display mac-address ${mac}"
         else
@@ -231,7 +250,8 @@ determine_query() {
     
     # ARP 表
     if [[ "${input}" =~ (arp|arp表|三层地址|ip地址表) ]]; then
-        local ip=$(extract_ip "${input}")
+        local ip=""
+        ip="$(extract_ip "${input}")"
         if [[ -n "${ip}" ]]; then
             echo "raw:display arp ${ip}"
         else
@@ -265,7 +285,8 @@ determine_query() {
     
     # 业务端口
     if [[ "${input}" =~ (service-port|sp|业务端口|业务流|gemport|tcont|traffic|flow) ]]; then
-        local sp_id=$(extract_first_num "${input}")
+        local sp_id=""
+        sp_id="$(extract_first_num "${input}")"
         if [[ -n "${sp_id}" ]]; then
             echo "service-port:${sp_id}"
         else
@@ -276,7 +297,8 @@ determine_query() {
     
     # VLAN
     if [[ "${input}" =~ (vlan|虚拟局域网|广播域|tag|untag) ]]; then
-        local vlan_id=$(extract_first_num "${input}")
+        local vlan_id=""
+        vlan_id="$(extract_first_num "${input}")"
         if [[ -n "${vlan_id}" ]]; then
             echo "raw:display vlan ${vlan_id}"
         else
@@ -287,7 +309,8 @@ determine_query() {
     
     # 流量统计
     if [[ "${input}" =~ (traffic|流量|统计|字节|包|packet|byte|counter|性能|perf) ]]; then
-        local port=$(parse_port_args "${input}")
+        local port=""
+        port="$(parse_port_args "${input}")"
         if [[ -n "${port}" ]]; then
             echo "traffic:${port}"
         else
@@ -323,7 +346,7 @@ determine_query() {
 }
 
 # 执行查询
-RESULT=$(determine_query "${INPUT_LOWER}")
+RESULT="$(determine_query "${INPUT_LOWER}")"
 QUERY_TYPE="${RESULT%%:*}"
 QUERY_ARGS="${RESULT#*:}"
 
