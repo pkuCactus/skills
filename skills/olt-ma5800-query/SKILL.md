@@ -232,7 +232,7 @@ display buffer occupancy
 
 ```
 [OLT连接] root@70.32.37.65
-[前置步骤] enable → config → mmi-mode enable
+[前置步骤] enable → config → mmi-mode enable → [命令] → return → quit
 [执行命令] display board 0
 ========================================
   ------------------------------------------------------------------------

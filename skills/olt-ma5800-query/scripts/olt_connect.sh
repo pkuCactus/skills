@@ -76,6 +76,12 @@ execute_cmd() {
     
     printf '%s\n' "${cmd}" >> "${tmpfile}"
     
+    # 步骤5: 退出CLI终端
+    # return: 从配置模式回到用户视图
+    # quit: 退出SSH会话
+    printf 'return\n' >> "${tmpfile}"
+    printf 'quit\n' >> "${tmpfile}"
+    
     # 通过 SSH 伪终端发送命令序列
     sshpass -p "${pass}" ssh -tt \
         -o StrictHostKeyChecking=no \
