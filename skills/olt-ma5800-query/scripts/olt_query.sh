@@ -22,6 +22,7 @@
 #   traffic [portid]                  - 查询流量统计
 #   log [operation|security]          - 查询日志
 #   health                             - 查询设备健康状态
+#   fan|emu                            - 查询风扇/EMU状态
 #
 # 环境变量:
 #   OLT_IP, OLT_USER, OLT_PASS, OLT_TIMEOUT, OLT_WIDTH
@@ -176,13 +177,18 @@ case "${QUERY_TYPE}" in
         CMD="display health"
         ;;
     
+    fan|emu|cooling)
+        # display emu
+        CMD="display emu"
+        ;;
+    
     *)
         # 未识别的查询类型，尝试作为原始命令传递
         if [[ -n "${QUERY_TYPE}" ]]; then
             CMD="${QUERY_TYPE} ${*}"
         else
             echo "错误: 未指定查询类型" >&2
-            echo "支持的查询类型: board, version, ont, ont-optical, alarm, interface, mac-address, arp, cpu, memory, temperature, config, port-state, ont-state, service-port, vlan, traffic, log, health" >&2
+            echo "支持的查询类型: board, version, ont, ont-optical, alarm, interface, mac-address, arp, cpu, memory, temperature, config, port-state, ont-state, service-port, vlan, traffic, log, health, fan/emu" >&2
             exit 1
         fi
         ;;

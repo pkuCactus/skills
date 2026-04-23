@@ -99,6 +99,12 @@ determine_query() {
         return
     fi
     
+    # 风扇/EMU 模块
+    if [[ "${input}" =~ (fan|风扇|emu|散热|cooling|风机|转速|rpm) ]]; then
+        echo "raw:display emu"
+        return
+    fi
+    
     # 版本/软件版本
     if [[ "${input}" =~ (version|版本|软件|firmware|patch|版本号) ]]; then
         local slot=$(extract_slot "${input}")
