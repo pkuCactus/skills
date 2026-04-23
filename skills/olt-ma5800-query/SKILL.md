@@ -47,19 +47,19 @@ SSH 登录 → enable → config → mmi-mode enable → [执行 display 命令]
 
 ### 第一步：文档搜索（最优先）
 
-用关键词在 `~/.openclaw/ma5800_md/cmd/` 目录下搜索相关命令：
+用关键词在 `${OPENCLAW_ROOT}/ma5800_md/cmd/` 目录下搜索相关命令：
 
 ```bash
 # 搜索文件名匹配
-ls ~/.openclaw/ma5800_md/cmd/ | grep -i "<关键词>"
+ls ${OPENCLAW_ROOT}/ma5800_md/cmd/ | grep -i "<关键词>"
 
 # 搜索内容匹配
-grep -l "<关键词>" ~/.openclaw/ma5800_md/cmd/*.md
+grep -l "<关键词>" ${OPENCLAW_ROOT}/ma5800_md/cmd/*.md
 
 # 提取命令格式和参数说明
-cat ~/.openclaw/ma5800_md/cmd/display_<命令名>.md | grep -A3 "命令格式"
-cat ~/.openclaw/ma5800_md/cmd/display_<命令名>.md | grep -A10 "参数说明"
-cat ~/.openclaw/ma5800_md/cmd/display_<命令名>.md | grep -B2 -A2 "举例"
+cat ${OPENCLAW_ROOT}/ma5800_md/cmd/display_<命令名>.md | grep -A3 "命令格式"
+cat ${OPENCLAW_ROOT}/ma5800_md/cmd/display_<命令名>.md | grep -A10 "参数说明"
+cat ${OPENCLAW_ROOT}/ma5800_md/cmd/display_<命令名>.md | grep -B2 -A2 "举例"
 ```
 
 ### 第二步：智能匹配优先级
@@ -77,7 +77,7 @@ cat ~/.openclaw/ma5800_md/cmd/display_<命令名>.md | grep -B2 -A2 "举例"
 
 ```bash
 # 示例：查看 display ont optical-info 的参数
-cat ~/.openclaw/ma5800_md/cmd/display_ont_optical-info.md | grep -A20 "参数说明"
+cat ${OPENCLAW_ROOT}/ma5800_md/cmd/display_ont_optical-info.md | grep -A20 "参数说明"
 ```
 
 **参数推断规则：**
@@ -260,17 +260,17 @@ echo "[参数说明] <解释参数含义>"
 ### 2. 搜索文档
 
 ```bash
-# 在 ~/.openclaw/ma5800_md/cmd/ 目录下搜索
-ls ~/.openclaw/ma5800_md/cmd/ | grep -i "光功率\|阈值"
-grep -l "光功率\|阈值" ~/.openclaw/ma5800_md/cmd/*.md
+# 在 ${OPENCLAW_ROOT}/ma5800_md/cmd/ 目录下搜索
+ls ${OPENCLAW_ROOT}/ma5800_md/cmd/ | grep -i "光功率\|阈值"
+grep -l "光功率\|阈值" ${OPENCLAW_ROOT}/ma5800_md/cmd/*.md
 ```
 
 ### 3. 查看候选命令
 
 ```bash
 # 查看找到命令的格式和参数
-cat ~/.openclaw/ma5800_md/cmd/display_port_optic-power-threshold.md | grep -A5 "命令格式"
-cat ~/.openclaw/ma5800_md/cmd/display_port_optic-power-threshold.md | grep -A15 "参数说明"
+cat ${OPENCLAW_ROOT}/ma5800_md/cmd/display_port_optic-power-threshold.md | grep -A5 "命令格式"
+cat ${OPENCLAW_ROOT}/ma5800_md/cmd/display_port_optic-power-threshold.md | grep -A15 "参数说明"
 ```
 
 ### 4. 推断参数
@@ -318,7 +318,7 @@ MA5800 display 命令输出超过一屏时提示 `--- More ---`。脚本通过�
 
 ## 完整命令参考
 
-所有支持的 `display` 命令详见转换后的 Markdown 文档：`~/.openclaw/ma5800_md/cmd/` 目录下 7000+ 条命令文档。
+所有支持的 `display` 命令详见转换后的 Markdown 文档：`${OPENCLAW_ROOT}/ma5800_md/cmd/` 目录下 7000+ 条命令文档。
 
 常用查询命令速查：
 
