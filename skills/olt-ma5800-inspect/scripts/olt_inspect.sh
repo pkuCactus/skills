@@ -76,6 +76,15 @@ parse_intent() {
     local lowered
     lowered="$(echo "${input}" | sed 's/.*/\L&/')"
     
+    # 检查项: 主控板SRAM检查
+    # 关键词: SRAM、主控板SRAM、H801SCUN
+    if contains "SRAM" "${input}" || \
+       contains "主控板SRAM" "${input}" || \
+       contains "H801SCUN" "${input}"; then
+        echo "intent:sram"
+        return
+    fi
+    
     # 检查项1: 主控板电子开关 / 告警参数检查
     # 关键词: 电子开关、主控板开关、开关状态、0x02310018
     if contains "电子开关" "${input}" || \
@@ -95,7 +104,6 @@ parse_intent() {
     if contains "单板" "${input}" || \
        contains "board" "${lowered}" || \
        contains "板卡" "${input}" || \
-       contains "主控板" "${input}" || \
        (contains "状态" "${input}" && contains "板" "${input}"); then
         echo "intent:board"
         return
@@ -165,6 +173,64 @@ parse_intent() {
     
     # 默认: 全部检查
     echo "intent:all"
+}
+
+# ============================================
+# 检查项: 主控板SRAM检查
+# 逻辑:
+#   1. 查主控板型号，如果是 H801SCUN 则继续检查
+#   2. 查告警ID 0x02310018，如果 Parameter1=75 且 Parameter2=12 则不通过
+# ============================================
+check_sram() {
+    print_header "检查项: 主控板SRAM检查"
+    
+    # 第一步: 查主控板型号
+    print_info "查询主控板型号..."
+    local board_output
+    board_output="$(exec_cmd "display board 0")"
+    
+    # 查找是否有 H801SCUN 主控板
+    local is_scun
+    is_scun="$(echo "${board_output}" | grep -i "H801SCUN" | head -1)"
+    
+    if [ -z "${is_scun}" ]; then
+        print_pass "主控板不是 H801SCUN，SRAM检查通过"
+        return 0
+    fi
+    
+    print_info "检测到 H801SCUN 主控板，继续检查告警参数..."
+    
+    # 第二步: 查告警参数
+    local alarm_id="0x02310018"
+    print_info "查询历史告警 ID=${alarm_id}..."
+    
+    local alarm_output
+    alarm_output="$(exec_cmd "display alarm history")"
+    
+    # 查找指定告警ID的记录块
+    local alarm_block
+    alarm_block="$(echo "${alarm_output}" | awk '/AlarmID.*'"${alarm_id}"'/,/PARAMETERS/')"
+    
+    if [ -z "${alarm_block}" ]; then
+        print_pass "主控板是 H801SCUN，但未找到告警 ID=${alarm_id}，SRAM检查通过"
+        return 0
+    fi
+    
+    # 提取 Parameter1 和 Parameter2
+    local param1 param2
+    param1="$(echo "${alarm_block}" | grep -oE 'Parameter1[^0-9]*([0-9]+)' | grep -oE '[0-9]+' | tail -1)"
+    param2="$(echo "${alarm_block}" | grep -oE 'Parameter2[^0-9]*([0-9]+)' | grep -oE '[0-9]+' | tail -1)"
+    
+    print_info "Parameter1=${param1:-未找到}, Parameter2=${param2:-未找到}"
+    
+    # 判断: 如果 Parameter1=75 且 Parameter2=12，则检查不通过
+    if [ "${param1}" = "75" ] && [ "${param2}" = "12" ]; then
+        print_fail "主控板是 H801SCUN，且 Parameter1=75 且 Parameter2=12，SRAM检查不通过"
+        return 1
+    else
+        print_pass "主控板是 H801SCUN，但 Parameter1=${param1}, Parameter2=${param2}，SRAM检查通过"
+        return 0
+    fi
 }
 
 # ============================================
@@ -394,6 +460,9 @@ check_version() {
 run_check() {
     local check_name="$1"
     case "${check_name}" in
+        sram)
+            check_sram
+            ;;
         alarm-param)
             check_alarm_param
             ;;
@@ -443,7 +512,7 @@ main() {
     local intent=""
     
     case "${input}" in
-        alarm-param|board|temperature|alarm|ont-optical|power|fan|version|all)
+        sram|alarm-param|board|temperature|alarm|ont-optical|power|fan|version|all)
             # 直接是命令
             intent="${input}"
             ;;
@@ -460,6 +529,7 @@ main() {
     # 执行检查
     case "${intent}" in
         all)
+            check_sram
             check_alarm_param
             check_board_status
             check_temperature
