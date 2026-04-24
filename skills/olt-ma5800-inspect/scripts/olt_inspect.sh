@@ -200,26 +200,31 @@ check_sram() {
     
     print_info "检测到 H801SCUN 主控板，继续检查告警参数..."
     
-    # 第二步: 查告警参数
+    # 第二步: 查告警参数（使用精确告警ID查询）
     local alarm_id="0x02310018"
     print_info "查询历史告警 ID=${alarm_id}..."
     
     local alarm_output
-    alarm_output="$(exec_cmd "display alarm history")"
+    alarm_output="$(exec_cmd "display alarm history alramid ${alarm_id}")"
     
-    # 查找指定告警ID的记录块
-    local alarm_block
-    alarm_block="$(echo "${alarm_output}" | awk '/AlarmID.*'"${alarm_id}"'/,/PARAMETERS/')"
-    
-    if [ -z "${alarm_block}" ]; then
+    # 检查是否找到告警
+    if echo "${alarm_output}" | grep -qi "No alarm\|不存在告警\|not found\|No record"; then
         print_pass "主控板是 H801SCUN，但未找到告警 ID=${alarm_id}，SRAM检查通过"
         return 0
     fi
     
-    # 提取 Parameter1 和 Parameter2
+    # 提取 Parameter1 和 Parameter2（支持多种格式）
     local param1 param2
-    param1="$(echo "${alarm_block}" | grep -oE 'Parameter1[^0-9]*([0-9]+)' | grep -oE '[0-9]+' | tail -1)"
-    param2="$(echo "${alarm_block}" | grep -oE 'Parameter2[^0-9]*([0-9]+)' | grep -oE '[0-9]+' | tail -1)"
+    param1="$(echo "${alarm_output}" | grep -oE 'Parameter1[[:space:]]*[=:][[:space:]]*([0-9]+)' | grep -oE '[0-9]+' | tail -1)"
+    param2="$(echo "${alarm_output}" | grep -oE 'Parameter2[[:space:]]*[=:][[:space:]]*([0-9]+)' | grep -oE '[0-9]+' | tail -1)"
+    
+    # 如果上面没匹配到，尝试其他格式
+    if [ -z "${param1}" ]; then
+        param1="$(echo "${alarm_output}" | grep -i "Parameter1" | grep -oE '[0-9]+' | tail -1)"
+    fi
+    if [ -z "${param2}" ]; then
+        param2="$(echo "${alarm_output}" | grep -i "Parameter2" | grep -oE '[0-9]+' | tail -1)"
+    fi
     
     print_info "Parameter1=${param1:-未找到}, Parameter2=${param2:-未找到}"
     
@@ -243,24 +248,31 @@ check_alarm_param() {
     local alarm_id="${1:-0x02310018}"
     print_info "查询历史告警 ID=${alarm_id}..."
     
+    # 使用精确告警ID查询，而不是查询全部再过滤
     local alarm_output
-    alarm_output="$(exec_cmd "display alarm history")"
+    alarm_output="$(exec_cmd "display alarm history alramid ${alarm_id}")"
     
-    # 查找指定告警ID的记录块 (从 AlarmID 到 PARAMETERS 之间的内容)
-    local alarm_block
-    alarm_block="$(echo "${alarm_output}" | awk '/AlarmID.*'"${alarm_id}"'/,/PARAMETERS/')"
-    
-    if [ -z "${alarm_block}" ]; then
+    # 检查是否找到告警（多种可能的提示语）
+    if echo "${alarm_output}" | grep -qiE "No alarm|不存在告警|not found|No record|没有任何告警"; then
         print_pass "未找到告警 ID=${alarm_id}，检查通过"
         return 0
     fi
     
     print_info "找到告警记录，提取参数..."
     
-    # 提取 Parameter1 和 Parameter2
+    # 提取 Parameter1 和 Parameter2（支持多种格式）
     local param1 param2
-    param1="$(echo "${alarm_block}" | grep -oE 'Parameter1[^0-9]*([0-9]+)' | grep -oE '[0-9]+' | tail -1)"
-    param2="$(echo "${alarm_block}" | grep -oE 'Parameter2[^0-9]*([0-9]+)' | grep -oE '[0-9]+' | tail -1)"
+    # 尝试格式: "Parameter1 = 67" 或 "Parameter1: 67" 或 "Parameter1  67"
+    param1="$(echo "${alarm_output}" | grep -oE 'Parameter1[[:space:]]*[=:][[:space:]]*([0-9]+)' | grep -oE '[0-9]+' | tail -1)"
+    param2="$(echo "${alarm_output}" | grep -oE 'Parameter2[[:space:]]*[=:][[:space:]]*([0-9]+)' | grep -oE '[0-9]+' | tail -1)"
+    
+    # 如果上面没匹配到，尝试其他格式（如纯文本中的数字）
+    if [ -z "${param1}" ]; then
+        param1="$(echo "${alarm_output}" | grep -i "Parameter1" | grep -oE '[0-9]+' | tail -1)"
+    fi
+    if [ -z "${param2}" ]; then
+        param2="$(echo "${alarm_output}" | grep -i "Parameter2" | grep -oE '[0-9]+' | tail -1)"
+    fi
     
     print_info "Parameter1=${param1:-未找到}, Parameter2=${param2:-未找到}"
     

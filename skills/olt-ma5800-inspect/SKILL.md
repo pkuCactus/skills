@@ -47,7 +47,8 @@ tags:
 
 | 检查项 | 命令 | 判断逻辑 |
 |--------|------|---------|
-| **告警参数检查** | `display alarm history` | Parameter1=67 且 Parameter2=35 → 不通过 |
+| **告警参数检查** | `display alarm history alramid <id>` | Parameter1=67 且 Parameter2=35 → 不通过 |
+| **主控板SRAM检查** | `display board 0` + `display alarm history alramid 0x02310018` | H801SCUN 且 Parameter1=75 且 Parameter2=12 → 不通过 |
 | **单板状态检查** | `display board 0` | 有 Failed/Abnormal → 不通过 |
 | **温度检查** | `display temperature 0` | 有 High/Critical → 警告 |
 | **活动告警检查** | `display alarm active` | 有活动告警 → 警告 |
