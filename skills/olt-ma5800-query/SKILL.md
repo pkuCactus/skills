@@ -1,6 +1,6 @@
 ---
 name: olt-ma5800-query
-description: Query Huawei MA5800 OLT device information through SSH CLI. Use when the user asks to query, view, check, or display OLT/MA5800 device status, board information, ONT status, optical power, alarms, interfaces, MAC/ARP tables, configuration, traffic statistics, or any device health information. Triggers on phrases like "查询 OLT", "查询 MA5800", "查看设备", "看看单板", "ONT 光功率", "查告警", "端口状态", "设备温度", "版本信息", "mac地址表", "arp表", "当前配置", "流量统计", "查日志", "设备健康", "风扇状态", "电源功率", "PON口状态", "光猫状态", "业务端口", "VLAN查询", "DHCP租约". Supports smart natural language query mapping to display commands. Automatically handles privilege mode switching (enable → config → mmi-mode enable).
+description: Query Huawei MA5800 OLT device status, boards, ONTs, optical power, alarms, interfaces, MAC/ARP tables, configuration, traffic, and health via SSH CLI. Use when the user asks to query, view, check, or display any MA5800 device information. Triggers on OLT/MA5800-related queries in Chinese or English. See references/triggers.md for the full trigger phrase list. Supports natural language mapping to display commands and auto privilege mode switching.
 ---
 
 # OLT MA5800 查询技能
@@ -111,6 +111,16 @@ description: Query Huawei MA5800 OLT device information through SSH CLI. Use whe
 6. **如果失败** — 重新查文档，或询问用户具体参数
 
 > 详细的失败处理流程和参数推断规则，参见 `references/troubleshooting.md`
+
+## 参考文档
+
+| 文件 | 内容 | 何时加载 |
+|------|------|---------|
+| `references/command-reference.md` | 完整命令速查 + 7000+ 命令搜索方法 | 需要完整命令列表时 |
+| `references/troubleshooting.md` | 故障排查、分页处理、CLI 模式、参数推断规则 | 命令执行失败或需深入了解时 |
+| `references/triggers.md` | 完整触发词列表（中英文） | 扩展触发识别时 |
+
+---
 
 ## 返回结果示例
 
