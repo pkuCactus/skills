@@ -119,6 +119,17 @@ description: Query Huawei MA5800 OLT device status, boards, ONTs, optical power,
 | `references/command-reference.md` | 完整命令速查 + 7000+ 命令搜索方法 | 需要完整命令列表时 |
 | `references/troubleshooting.md` | 故障排查、分页处理、CLI 模式、参数推断规则 | 命令执行失败或需深入了解时 |
 | `references/triggers.md` | 完整触发词列表（中英文） | 扩展触发识别时 |
+| `references/execution-log.md` | 执行案例日志（成功/失败记录） | 执行后记录结果、回顾优化时 |
+
+## 自进化：执行后记录
+
+每次执行命令后，无论成败，都应在 `references/execution-log.md` 中追加记录：
+
+1. **成功执行** → 记录验证了哪些推断逻辑有效
+2. **命令失败** → 记录失败原因（命令不支持 / 参数错误 / 权限不足 / 硬件不存在）
+3. **定期回顾** → 基于日志更新 `troubleshooting.md` 和推断逻辑
+
+记录模板参见 `execution-log.md` 文件头部的格式说明。
 
 ---
 
